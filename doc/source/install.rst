@@ -28,14 +28,16 @@ get CMake, and Mercurial with either homebrew or macports:
 On **Windows**, see :ref:`windows-cpp-install`.
 
 To compile DyNet you also need the `development version of the Eigen
-library <https://bitbucket.org/eigen/eigen>`__. **If you use any of the
+library <https://gitlab.com/libeigen/eigen>`__. **If you use any of the
 released versions, you may get assertion failures or compile errors.**
 If you don't have Eigen already, you can get it easily using the
 following command:
 
 ::
 
-    hg clone https://bitbucket.org/eigen/eigen/ -r 2355b22
+    git clone https://gitlab.com/libeigen/eigen/
+    cd eigen
+    git checkout 603e213d13311af286c8c1abd4ea14a8bd3d204e
     
 The `-r NUM` specified a revision number that is known to work.  Adventurous
 users can remove it and use the very latest version, at the risk of the code
@@ -79,11 +81,29 @@ To see that things have built properly, you can run
 
 ::
 
-    ./examples/train_xor
+    ./examples/xor
 
 which will train a multilayer perceptron to predict the xor function.
 
 If any process here fails, please see :ref:`debugging-asking` for help.
+
+By default, Dynet will be compiled with the ``-Ofast`` optimization
+level which enables the ``-ffast-math`` option.  In most cases,
+this is be acceptable. However, it may impact mathematical computation outside
+the core of dynet, see `this issue <https://github.com/clab/dynet/issues/1433>`__.
+the ``RELEASE_OPT_LEVEL`` can be used to change the optimization level:
+
+::
+
+     cmake .. -DRELEASE_OPT_LEVEL=3 -DEIGEN3_INCLUDE_DIR=/path/to/eigen
+
+The ``CXXFLAGS`` environment variable can be used for more specific tunning,
+for example
+
+::
+    cmake -E env CXXFLAGS="-fno-math-errno" cmake .. -DRELEASE_OPT_LEVEL=3 -DEIGEN3_INCLUDE_DIR=/path/to/eigen
+
+Note that ``CXXFLAGS`` is only checked during the `first configuration <https://cmake.org/cmake/help/latest/envvar/CXXFLAGS.html>`__.
 
 Compiling/linking external programs
 -----------------------------------
@@ -124,11 +144,10 @@ you can speed compilation significantly by adding ``-DCUDA_ARCH=XXX`` where
 cuDNN support
 ~~~~~~~~~~~~~
 
-When running DyNet with CUDA on GPUs, some of DyNet's functionalities
-(e.g. conv2d) will depend on the `NVIDIA cuDNN libraries <https://developer.nvidia.com/cudnn>`__.
-CMake will automatically detect cuDNN in the suggested installation path 
-by NVIDIA (i.e. ``/usr/local/cuda``) and enable those functionalities 
-if detected.
+When running DyNet with CUDA on GPUs, some of DyNet's functionality
+(e.g. conv2d) depends on the `NVIDIA cuDNN libraries <https://developer.nvidia.com/cudnn>`__.
+CMake will automatically detect cuDNN in the CUDA installation path 
+(i.e. ``/usr/local/cuda``) and enable it if detected.
 
 If CMake is unable to find cuDNN automatically, try setting `CUDNN_ROOT`, such as
 
@@ -136,12 +155,9 @@ If CMake is unable to find cuDNN automatically, try setting `CUDNN_ROOT`, such a
 
     -DCUDNN_ROOT="/path/to/CUDNN"
 
-. However, if you don't have cuDNN installed, those dependend functionalities 
+However, if you don't have cuDNN installed, the dependent functionality
 will be automatically disabled and an error will be throwed during runtime if you try
 to use them.
-
-Currently, DyNet supports cuDNN v5.1, future versions will also be supported soon.
-
 
 MKL support
 ~~~~~~~~~~~
@@ -236,10 +252,10 @@ in the generated solution**
 
 The Windows build also supports MKL and CUDA with the latest version of Eigen. If you build with 
 CUDA and/or cuDNN, ensure their respective DLLs are in your PATH environment variable when you use
-dynet (whether in native C++ or Python). For example:
+DyNet (whether in native C++ or Python). For example:
 
 ::
 
-    set PATH="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\bin";"c:\libs\cudnn-8.0-windows10-x64-v5.1\bin";%PATH%
+    set PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\bin;c:\libs\cudnn-8.0-windows10-x64-v5.1\bin;%PATH%
 
 

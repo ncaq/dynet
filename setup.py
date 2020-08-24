@@ -117,8 +117,7 @@ if (EIGEN3_INCLUDE_DIR is not None and
     os.path.isdir(os.path.join(os.pardir, EIGEN3_INCLUDE_DIR))):
     EIGEN3_INCLUDE_DIR = os.path.join(os.pardir, EIGEN3_INCLUDE_DIR)
 
-EIGEN3_DOWNLOAD_URL = ENV.get("EIGEN3_DOWNLOAD_URL", "https://bitbucket.org/eigen/eigen/get/2355b229ea4c.zip") 
-# EIGEN3_DOWNLOAD_URL = ENV.get("EIGEN3_DOWNLOAD_URL", "https://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2")
+EIGEN3_DOWNLOAD_URL = ENV.get("EIGEN3_DOWNLOAD_URL", "https://gitlab.com/libeigen/eigen/-/archive/603e213d13311af286c8c1abd4ea14a8bd3d204e/eigen-603e213d13311af286c8c1abd4ea14a8bd3d204e.zip") 
     
 # Remove the "-Wstrict-prototypes" compiler option, which isn't valid for C++.
 cfg_vars = distutils.sysconfig.get_config_vars()
@@ -276,7 +275,7 @@ class build(_build):
                 "-DEIGEN3_INCLUDE_DIR=%r" % EIGEN3_INCLUDE_DIR,
                 "-DPYTHON=%r" % PYTHON,
             ]
-            for env_var in ("BACKEND", "CUDNN_ROOT"):
+            for env_var in ("BACKEND", "CUDNN_ROOT", "CUDA_TOOLKIT_ROOT_DIR"):
                 value = ENV.get(env_var)
                 if value is not None:
                     cmake_cmd.append("-D" + env_var + "=%r" % value)
@@ -389,6 +388,7 @@ setup(
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
     author="Graham Neubig",

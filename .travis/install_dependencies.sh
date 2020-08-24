@@ -5,13 +5,15 @@ set -xe
 if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
   sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   sudo apt-get -qq update
-  sudo apt-get install -y gcc-4.8 g++-4.8
+  sudo apt-get install -y gcc-4.8 g++-4.8 libssl-dev
   PYTHON_PACKAGES="numpy pypandoc twine auditwheel cython"
   if [[ "$PYTHON_INSTALL" == manual ]]; then
     sudo apt-get install -y --allow-unauthenticated libboost-filesystem1.55-dev libboost-program-options1.55-dev libboost-serialization1.55-dev libboost-test1.55-dev libboost-regex1.55-dev
     sudo -H pip install -U $PYTHON_PACKAGES
   else
     sudo apt-get install -y pandoc
+    pip install -U pip
+    pip install --prefer-binary cryptography
     pip install -U $PYTHON_PACKAGES
   fi
 else
@@ -25,7 +27,7 @@ else
   hash -r
   conda config --set always_yes yes --set changeps1 no
   conda update -q conda
-  conda create -q -n "$PYVER" python="$PYVER" numpy cython
+  conda create -c conda-forge -q -n "$PYVER" python="$PYVER" numpy cython
   # Useful for debugging any issues with conda
   conda info -a
   source activate "$PYVER"
@@ -47,7 +49,9 @@ if [[ "$BACKEND" == cuda ]]; then
 fi
 
 # Eigen
-hg clone https://bitbucket.org/eigen/eigen/ -r 2355b22
+wget http://gitlab.com/libeigen/eigen/-/archive/603e213d13311af286c8c1abd4ea14a8bd3d204e/eigen-603e213d13311af286c8c1abd4ea14a8bd3d204e.zip
+unzip eigen-603e213d13311af286c8c1abd4ea14a8bd3d204e.zip
+mv eigen-603e213d13311af286c8c1abd4ea14a8bd3d204e eigen
 cd eigen
 mkdir build && cd build
 cmake ..
